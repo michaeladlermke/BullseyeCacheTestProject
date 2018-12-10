@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.1",
-    "signature": "4d9ecd2b79567cdadd79a85a5384debb9f91df42"
+    "signature": "6362ff7ba6d40e322cb935eda70543fca386743b"
   },
   "compilationOptions": {},
   "targets": {
@@ -11,6 +11,7 @@
           "BullseyeCacheLibrary": "1.0.0",
           "Microsoft.NET.Test.Sdk": "15.8.0",
           "Moq": "4.10.1",
+          "log4net": "2.0.8",
           "xunit": "2.3.1",
           "xunit.runner.visualstudio": "2.3.1"
         },
@@ -87,6 +88,42 @@
           "lib/net45/EntityFramework.dll": {
             "assemblyVersion": "5.0.0.0",
             "fileVersion": "5.0.20627.0"
+          }
+        }
+      },
+      "log4net/2.0.8": {
+        "dependencies": {
+          "System.AppContext": "4.3.0",
+          "System.Collections.NonGeneric": "4.3.0",
+          "System.Console": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Diagnostics.Process": "4.1.0",
+          "System.Diagnostics.StackTrace": "4.3.0",
+          "System.Diagnostics.TraceSource": "4.3.0",
+          "System.IO.FileSystem": "4.3.0",
+          "System.IO.FileSystem.Watcher": "4.0.0",
+          "System.Linq": "4.3.0",
+          "System.Net.NameResolution": "4.0.0",
+          "System.Net.Requests": "4.0.11",
+          "System.Net.Sockets": "4.1.0",
+          "System.Reflection": "4.3.0",
+          "System.Reflection.Extensions": "4.3.0",
+          "System.Reflection.TypeExtensions": "4.5.1",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
+          "System.Runtime.Serialization.Formatters": "4.3.0",
+          "System.Text.RegularExpressions": "4.3.0",
+          "System.Threading": "4.3.0",
+          "System.Threading.Thread": "4.3.0",
+          "System.Threading.Timer": "4.0.1",
+          "System.Xml.ReaderWriter": "4.3.0",
+          "System.Xml.XmlDocument": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.3/log4net.dll": {
+            "assemblyVersion": "2.0.8.0",
+            "fileVersion": "2.0.8.0"
           }
         }
       },
@@ -936,7 +973,7 @@
           "System.Runtime.InteropServices.RuntimeInformation": "4.0.0",
           "System.Runtime.Loader": "4.0.0",
           "System.Runtime.Serialization.Json": "4.0.2",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
+          "System.Runtime.Serialization.Primitives": "4.3.0",
           "System.Threading.Thread": "4.3.0",
           "System.Xml.XPath.XmlDocument": "4.0.1"
         },
@@ -1664,6 +1701,39 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "System.IO.FileSystem.Watcher/4.0.0": {
+        "dependencies": {
+          "Microsoft.Win32.Primitives": "4.0.1",
+          "System.Collections": "4.3.0",
+          "System.IO.FileSystem": "4.3.0",
+          "System.IO.FileSystem.Primitives": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Threading": "4.3.0",
+          "System.Threading.Overlapped": "4.0.1",
+          "System.Threading.Tasks": "4.3.0",
+          "System.Threading.Thread": "4.3.0",
+          "runtime.native.System": "4.3.0"
+        },
+        "runtimeTargets": {
+          "runtime/linux/lib/_._": {
+            "rid": "linux",
+            "assetType": "runtime"
+          },
+          "runtime/osx/lib/_._": {
+            "rid": "osx",
+            "assetType": "runtime"
+          },
+          "runtime/win/lib/_._": {
+            "rid": "win",
+            "assetType": "runtime"
+          }
+        }
+      },
       "System.Linq/4.3.0": {
         "dependencies": {
           "System.Collections": "4.3.0",
@@ -1746,6 +1816,33 @@
           }
         }
       },
+      "System.Net.NameResolution/4.0.0": {
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Tracing": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.Net.Primitives": "4.0.11",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.Handles": "4.3.0",
+          "System.Runtime.InteropServices": "4.3.0",
+          "System.Security.Principal.Windows": "4.5.0",
+          "System.Threading": "4.3.0",
+          "System.Threading.Tasks": "4.3.0",
+          "runtime.native.System": "4.3.0"
+        },
+        "runtimeTargets": {
+          "runtime/unix/lib/_._": {
+            "rid": "unix",
+            "assetType": "runtime"
+          },
+          "runtime/win/lib/_._": {
+            "rid": "win",
+            "assetType": "runtime"
+          }
+        }
+      },
       "System.Net.Primitives/4.0.11": {
         "dependencies": {
           "System.Runtime": "4.3.0",
@@ -1776,6 +1873,14 @@
             "rid": "win",
             "assetType": "runtime"
           }
+        }
+      },
+      "System.Net.Sockets/4.1.0": {
+        "dependencies": {
+          "System.IO": "4.3.0",
+          "System.Net.Primitives": "4.0.11",
+          "System.Runtime": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
         }
       },
       "System.Net.WebHeaderCollection/4.0.1": {
@@ -1812,7 +1917,7 @@
           "System.Resources.ResourceManager": "4.3.0",
           "System.Runtime": "4.3.0",
           "System.Runtime.Extensions": "4.3.0",
-          "System.Runtime.Serialization.Primitives": "4.1.1",
+          "System.Runtime.Serialization.Primitives": "4.3.0",
           "System.Text.Encoding": "4.3.0",
           "System.Text.Encoding.Extensions": "4.3.0",
           "System.Text.RegularExpressions": "4.3.0",
@@ -1955,6 +2060,15 @@
           "System.Runtime.Extensions": "4.3.0"
         }
       },
+      "System.Runtime.Serialization.Formatters/4.3.0": {
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Reflection": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Serialization.Primitives": "4.3.0"
+        }
+      },
       "System.Runtime.Serialization.Json/4.0.2": {
         "dependencies": {
           "System.IO": "4.3.0",
@@ -1962,7 +2076,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "System.Runtime.Serialization.Primitives/4.1.1": {
+      "System.Runtime.Serialization.Primitives/4.3.0": {
         "dependencies": {
           "System.Resources.ResourceManager": "4.3.0",
           "System.Runtime": "4.3.0"
@@ -2254,6 +2368,23 @@
           "System.Threading.Tasks": "4.3.0"
         }
       },
+      "System.Threading.Overlapped/4.0.1": {
+        "dependencies": {
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Handles": "4.3.0"
+        },
+        "runtimeTargets": {
+          "runtime/unix/lib/_._": {
+            "rid": "unix",
+            "assetType": "runtime"
+          },
+          "runtime/win/lib/_._": {
+            "rid": "win",
+            "assetType": "runtime"
+          }
+        }
+      },
       "System.Threading.Tasks/4.3.0": {
         "dependencies": {
           "System.Runtime": "4.3.0"
@@ -2281,6 +2412,11 @@
         "dependencies": {
           "System.Runtime": "4.3.0",
           "System.Runtime.Handles": "4.3.0"
+        }
+      },
+      "System.Threading.Timer/4.0.1": {
+        "dependencies": {
+          "System.Runtime": "4.3.0"
         }
       },
       "System.ValueTuple/4.3.0": {
@@ -2467,7 +2603,8 @@
         "dependencies": {
           "AWSSDK.Extensions.NETCore.Setup": "3.3.5",
           "Microsoft.AspNet.Providers.Core": "1.2.0",
-          "Microsoft.AspNetCore.Mvc": "2.2.0-preview3-35497"
+          "Microsoft.AspNetCore.Mvc": "2.2.0-preview3-35497",
+          "log4net": "2.0.8"
         },
         "runtime": {
           "BullseyeCacheLibrary.dll": {}
@@ -2508,6 +2645,13 @@
       "sha512": "sha512-SbsFSW+ISwO94Vt7583cFCh0kb9FIAmdTWo80BLumDnAjDX5SOSEHTsavQzTN14G/yRLOPtS6d9mXNIqe6NiKQ==",
       "path": "entityframework/5.0.0",
       "hashPath": "entityframework.5.0.0.nupkg.sha512"
+    },
+    "log4net/2.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dwvu/YELc2nF5gjAnJMXJToYXVdK8Ma0BfLTEugMTM6l8kFysL9Np5LnwhUV6EKTkbRmVTa0/X1/8oSICcoHHw==",
+      "path": "log4net/2.0.8",
+      "hashPath": "log4net.2.0.8.nupkg.sha512"
     },
     "Microsoft.AspNet.Providers.Core/1.2.0": {
       "type": "package",
@@ -3363,6 +3507,13 @@
       "path": "system.io.filesystem.primitives/4.3.0",
       "hashPath": "system.io.filesystem.primitives.4.3.0.nupkg.sha512"
     },
+    "System.IO.FileSystem.Watcher/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-b3KVTcliK4JBOowkcHvwpufp9Mgxku9HKUyNH+x/JgWcciB/TPPFubcV2c9R1ZKFlZw+MNj5xoXf3qLIlVPNow==",
+      "path": "system.io.filesystem.watcher/4.0.0",
+      "hashPath": "system.io.filesystem.watcher.4.0.0.nupkg.sha512"
+    },
     "System.Linq/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -3398,6 +3549,13 @@
       "path": "system.net.http/4.1.0",
       "hashPath": "system.net.http.4.1.0.nupkg.sha512"
     },
+    "System.Net.NameResolution/4.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-gwBjwj3HNnHBBbSQtKdLZtn3+wAJIRPOlA/7iCNhIW7qcWWjlaLQd79AUlmTEc6pArB7uLWBTe7UmyemgUJFqQ==",
+      "path": "system.net.nameresolution/4.0.0",
+      "hashPath": "system.net.nameresolution.4.0.0.nupkg.sha512"
+    },
     "System.Net.Primitives/4.0.11": {
       "type": "package",
       "serviceable": true,
@@ -3411,6 +3569,13 @@
       "sha512": "sha512-qNQBFFZsSX63hK3TKVJsnBa9WWP8Nwyzo9iFFHBF49FAeGANGNxB6ECedbWVODbUUOdnhQpwC0Wd/WGw84pv8Q==",
       "path": "system.net.requests/4.0.11",
       "hashPath": "system.net.requests.4.0.11.nupkg.sha512"
+    },
+    "System.Net.Sockets/4.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xAz0N3dAV/aR/9g8r0Y5oEqU1JRsz29F5EGb/WVHmX3jVSLqi2/92M5hTad2aNWovruXrJpJtgZ9fccPMG9uSw==",
+      "path": "system.net.sockets/4.1.0",
+      "hashPath": "system.net.sockets.4.1.0.nupkg.sha512"
     },
     "System.Net.WebHeaderCollection/4.0.1": {
       "type": "package",
@@ -3552,6 +3717,13 @@
       "path": "system.runtime.numerics/4.3.0",
       "hashPath": "system.runtime.numerics.4.3.0.nupkg.sha512"
     },
+    "System.Runtime.Serialization.Formatters/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-KT591AkTNFOTbhZlaeMVvfax3RqhH1EJlcwF50Wm7sfnBLuHiOeZRRKrr1ns3NESkM20KPZ5Ol/ueMq5vg4QoQ==",
+      "path": "system.runtime.serialization.formatters/4.3.0",
+      "hashPath": "system.runtime.serialization.formatters.4.3.0.nupkg.sha512"
+    },
     "System.Runtime.Serialization.Json/4.0.2": {
       "type": "package",
       "serviceable": true,
@@ -3559,12 +3731,12 @@
       "path": "system.runtime.serialization.json/4.0.2",
       "hashPath": "system.runtime.serialization.json.4.0.2.nupkg.sha512"
     },
-    "System.Runtime.Serialization.Primitives/4.1.1": {
+    "System.Runtime.Serialization.Primitives/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HZ6Du5QrTG8MNJbf4e4qMO3JRAkIboGT5Fk804uZtg3Gq516S7hAqTm2UZKUHa7/6HUGdVy3AqMQKbns06G/cg==",
-      "path": "system.runtime.serialization.primitives/4.1.1",
-      "hashPath": "system.runtime.serialization.primitives.4.1.1.nupkg.sha512"
+      "sha512": "sha512-Wz+0KOukJGAlXjtKr+5Xpuxf8+c8739RI1C+A2BoQZT+wMCCoMDDdO8/4IRHfaVINqL78GO8dW8G2lW/e45Mcw==",
+      "path": "system.runtime.serialization.primitives/4.3.0",
+      "hashPath": "system.runtime.serialization.primitives.4.3.0.nupkg.sha512"
     },
     "System.Security.AccessControl/4.5.0": {
       "type": "package",
@@ -3692,6 +3864,13 @@
       "path": "system.threading/4.3.0",
       "hashPath": "system.threading.4.3.0.nupkg.sha512"
     },
+    "System.Threading.Overlapped/4.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-f7aLuLkBoCQM2kng7zqLFBXz9Gk48gDK8lk1ih9rH/1arJJzZK9gJwNvPDhL6Ps/l6rwOr8jw+4FCHL0KKWiEg==",
+      "path": "system.threading.overlapped/4.0.1",
+      "hashPath": "system.threading.overlapped.4.0.1.nupkg.sha512"
+    },
     "System.Threading.Tasks/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -3726,6 +3905,13 @@
       "sha512": "sha512-IMXgB5Vf/5Qw1kpoVgJMOvUO1l32aC+qC3OaIZjWJOjvcxuxNWOK2ZTWWYXfij22NHxT2j1yWX5vlAeQWld9vA==",
       "path": "system.threading.threadpool/4.0.10",
       "hashPath": "system.threading.threadpool.4.0.10.nupkg.sha512"
+    },
+    "System.Threading.Timer/4.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-saGfUV8uqVW6LeURiqxcGhZ24PzuRNaUBtbhVeuUAvky1naH395A/1nY0P2bWvrw/BreRtIB/EzTDkGBpqCwEw==",
+      "path": "system.threading.timer/4.0.1",
+      "hashPath": "system.threading.timer.4.0.1.nupkg.sha512"
     },
     "System.ValueTuple/4.3.0": {
       "type": "package",

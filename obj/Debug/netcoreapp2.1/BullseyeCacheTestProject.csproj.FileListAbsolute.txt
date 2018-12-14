@@ -6,8 +6,6 @@ C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheTestProje
 C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheTestProject.runtimeconfig.dev.json
 C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheTestProject.dll
 C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheTestProject.pdb
-C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheLibrary.dll
-C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\BullseyeCacheLibrary.pdb
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.csprojAssemblyReference.cache
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.csproj.CoreCompileInputs.cache
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.AssemblyInfoInputs.cache
@@ -15,3 +13,5 @@ C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProje
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.csproj.CopyComplete
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.dll
 C:\repos\BullseyeCacheTestProject\obj\Debug\netcoreapp2.1\BullseyeCacheTestProject.pdb
+C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\Baxter.Bullseye.MemoryCache.dll
+C:\repos\BullseyeCacheTestProject\bin\Debug\netcoreapp2.1\Baxter.Bullseye.MemoryCache.pdb

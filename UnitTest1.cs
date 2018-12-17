@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Baxter.Bullseye.MemoryCache;
 using log4net;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace BullseyeCacheTestProject
 {
@@ -26,6 +27,7 @@ namespace BullseyeCacheTestProject
                 SizeLimit = 1024
             }
         );
+        
 
         [Theory]
         [InlineData(null)]
@@ -76,14 +78,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddDevice_AddSingleDevice_ReturnsOne()
         {
-            var moqLogger = new Mock<ILog>();
-            moqLogger.Setup(x => x.Error("Null Reference Exception!"));
-            //var cache = new BullseyeMemoryCache(moqCache.Object);
-            //moqLogger.Setup(x => x.Error("Error: Cache can't be null."));
-            //todo
-
-            //moqCache.Setup(x => x.CreateEntry()).Returns("this is what I want it to return");
-
             var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
             
             cache.AddDevice(dev02,3);
@@ -245,7 +239,6 @@ namespace BullseyeCacheTestProject
             var countAfterRemoval = cache.Count;
 
             Assert.Equal(0, countAfterRemoval);
-
         }
 
         [Fact]

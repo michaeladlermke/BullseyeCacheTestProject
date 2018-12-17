@@ -3,6 +3,7 @@ using Xunit;
 using Moq;
 using System.Collections.Generic;
 using Baxter.Bullseye.MemoryCache;
+using log4net;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BullseyeCacheTestProject
@@ -18,11 +19,13 @@ namespace BullseyeCacheTestProject
         readonly BullseyeDevice dev07 = new BullseyeDevice("device 07", "{ 07 some device info; device info here; }");
         readonly BullseyeDevice dev08 = new BullseyeDevice("device 08", "{ 08 some device info; device info here; }");
         readonly BullseyeDeviceHelper helper = new BullseyeDeviceHelper();
-
-        readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions
-        {
-            SizeLimit = 1024
-        });
+        
+        readonly MemoryCache _cache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 1024
+            }
+        );
 
         [Theory]
         [InlineData(null)]
@@ -35,7 +38,7 @@ namespace BullseyeCacheTestProject
         public void AddMultipleDevices_ListOfThreeDevicesAdded_CacheSizeIsThree()
         {
             var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            List<IBullseyeDevice> list = new List<IBullseyeDevice>(){ dev05, dev01, dev02};
+            var list = new List<IBullseyeDevice>(){ dev05, dev01, dev02};
             cache.AddMultipleDevices(list, 3);
             var size = cache.Count;
             Assert.Equal(3, size);
@@ -45,7 +48,7 @@ namespace BullseyeCacheTestProject
         public void AddMultipleDevices_EmptyListAdded_CacheSizeIsZero()
         {
             var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            List<IBullseyeDevice> list = new List<IBullseyeDevice>();
+            var list = new List<IBullseyeDevice>();
             cache.AddMultipleDevices(list, 3);
             var size = cache.Count;
             Assert.Equal(0, size);
@@ -73,7 +76,16 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddDevice_AddSingleDevice_ReturnsOne()
         {
+            var moqLogger = new Mock<ILog>();
+            moqLogger.Setup(x => x.Error("Null Reference Exception!"));
+            //var cache = new BullseyeMemoryCache(moqCache.Object);
+            //moqLogger.Setup(x => x.Error("Error: Cache can't be null."));
+            //todo
+
+            //moqCache.Setup(x => x.CreateEntry()).Returns("this is what I want it to return");
+
             var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            
             cache.AddDevice(dev02,3);
             var size = cache.Count;
             Assert.Equal(1, size);
@@ -105,6 +117,8 @@ namespace BullseyeCacheTestProject
         {
             var moqCache = new Mock<IMemoryCache>();
             var cache = new BullseyeMemoryCache(moqCache.Object);
+            // todo
+
            
             var size = cache.Count;
             Assert.Equal(0, size);
@@ -180,7 +194,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void NewDeviceCallback_StartUpActionDoesSomething_ActionsArePerformed()
         {
-            //todo
             var flag = false;
             var keyword = "Not In";
             var addedDevice = "";
@@ -206,7 +219,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void NewDeviceCallback_StartUpActionDefaultCacheConstructor_NoNewDeviceCallbackIsCalledButDeviceGetsAdded()
         {
-            //todo
             var flag = false;
             var keyword = "Not In";
             var addedDevice = "";
@@ -239,7 +251,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void RemovedDeviceCallback_DeviceIsRemoved_EvictionCallbackIsCalled()
         {
-            //todo
             var flag = true;
             var keyword = "Not In";
             var removedDevice = "";
@@ -427,7 +438,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddDevice_AddDeviceThatAlreadyExists_UpdateDeviceCallbackRunsInstead()
         {
-            //todo
             var flag = false;
             var keyword = "No Device";
             var updatedDevice = "";
@@ -497,7 +507,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddMultipleDevices_AddDevicesThatAlreadyExist_UpdateDeviceCallbackRunsInstead()
         {
-            //todo
             var flag = false;
             var keyword = "No Device";
 
@@ -531,10 +540,8 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddMultipleDevices_AddMixOfNewAndExistingDevices_AllDevicesAddedAsExpected()
         {
-            //todo
             var flag = false;
             var updatedDeviceList = new List<IBullseyeDevice>();
-            var UpdateList = new List<IBullseyeDevice> {dev01, dev02};
             var keyword = "no devices";
 
             void UpdateAction(IBullseyeDevice device)
@@ -707,7 +714,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void UpdateDevice_UpdateDeviceThatDoesNotExist_NewDeviceCallbackRunsInstead()
         {
-            //todo
             var flag = false;
             var keyword = "No Device";
             var updatedDevice = "";
@@ -739,7 +745,6 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void UpdatedDeviceCallback_StateUnderTest_ExpectedBehavior()
         {
-            //todo
             var flag = false;
             var keyword = "Not Updated";
             var updatedDevice = "";
@@ -758,8 +763,7 @@ namespace BullseyeCacheTestProject
             cache.AddDevice(dev01, 3);
             
             cache.UpdateDevice(dev01, 9);
-
-            //todo
+            
             Assert.True(flag);
             Assert.Equal(dev01.Id, updatedDevice);
             Assert.Equal("Now Updated", keyword);

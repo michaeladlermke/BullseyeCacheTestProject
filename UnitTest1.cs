@@ -3,7 +3,6 @@ using Xunit;
 using Moq;
 using System.Collections.Generic;
 using Baxter.Bullseye.MemoryCache;
-using log4net;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +18,7 @@ namespace BullseyeCacheTestProject
         readonly BullseyeDevice dev06 = new BullseyeDevice("device 06", "{ 06 some device info; device info here; }");
         readonly BullseyeDevice dev07 = new BullseyeDevice("device 07", "{ 07 some device info; device info here; }");
         readonly BullseyeDevice dev08 = new BullseyeDevice("device 08", "{ 08 some device info; device info here; }");
-        readonly BullseyeDeviceHelper helper = new BullseyeDeviceHelper();
+        private readonly BullseyeDeviceHelper _helper = new BullseyeDeviceHelper();
         
         readonly MemoryCache _cache = new MemoryCache(
             new MemoryCacheOptions
@@ -27,8 +26,8 @@ namespace BullseyeCacheTestProject
                 SizeLimit = 1024
             }
         );
-        
 
+        #region DummyBullseyeDeviceTests
         [Theory]
         [InlineData(null)]
         public void BullseyeDeviceEquals_NullDeviceEquals_ThrowsException(BullseyeDevice nullDevice)
@@ -36,11 +35,18 @@ namespace BullseyeCacheTestProject
             Assert.Throws<ArgumentNullException>(() => dev08.Equals(nullDevice));
         }
 
+        #endregion
+
+        #region CacheLibraryTests
         [Fact]
         public void AddMultipleDevices_ListOfThreeDevicesAdded_CacheSizeIsThree()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            var list = new List<IBullseyeDevice>(){ dev05, dev01, dev02};
+            var mockBc = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mockBc.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+            var list = new List<IBullseyeDevice>(){ dev05, dev01, dev02 };
             cache.AddMultipleDevices(list, 3);
             var size = cache.Count;
             Assert.Equal(3, size);
@@ -49,7 +55,11 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddMultipleDevices_EmptyListAdded_CacheSizeIsZero()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
             var list = new List<IBullseyeDevice>();
             cache.AddMultipleDevices(list, 3);
             var size = cache.Count;
@@ -60,26 +70,37 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void AddMultipleDevices_SearchForNullList_ThrowsException(List<IBullseyeDevice> list)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             Assert.Throws<ArgumentNullException>(() => cache.AddMultipleDevices(list, 3));
         }
 
         [Fact]
         public void AddMultipleDevices_AddDevicesWithBadTime_ThrowsException()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
             var list = new List<IBullseyeDevice>() { dev01, dev02, dev03 };
 
             Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, -3));
         }
-
-
+        
         [Fact]
         public void AddDevice_AddSingleDevice_ReturnsOne()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev02,3);
             var size = cache.Count;
             Assert.Equal(1, size);
@@ -88,7 +109,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddDevice_AddModifiedDeviceAlreadyInCache_ReturnsOne()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev02, 3);
             var updatedDevice = new BullseyeDevice(dev02.Id, "EDITED DEVICE");
 
@@ -98,21 +124,29 @@ namespace BullseyeCacheTestProject
             Assert.Equal(1, size);
         }
 
-        [Fact]
-        public void AddDevice_AddSingleDeviceWithBadTime_ThrowsException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(-3)]
+        [InlineData(0)]
+        public void AddDevice_AddSingleDeviceWithBadTime_ThrowsException(int seconds)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddDevice(dev02, -3));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddDevice(dev02, seconds));
         }
-
-
+        
         [Fact]
         public void BullseyeMemoryCache_DefaultConstructor_EmptyCacheCreated()
         {
             var moqCache = new Mock<IMemoryCache>();
-            var cache = new BullseyeMemoryCache(moqCache.Object);
-            // todo
-
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(moqCache.Object, logger);
            
             var size = cache.Count;
             Assert.Equal(0, size);
@@ -121,31 +155,31 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void CheckCacheForMultipleDevices_FiveDevicesAddedThreeSearchedFor_AllSearchedForFound()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            List<IBullseyeDevice> insertList = new List<IBullseyeDevice>() { dev05, dev01, dev02, dev03, dev04 };
-            List<IBullseyeDevice> searchList = new List<IBullseyeDevice>() { dev06, dev07, dev02, dev03, dev04 };
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
+            var insertList = new List<IBullseyeDevice>() { dev05, dev01, dev02, dev03, dev04 };
+            var searchList = new List<IBullseyeDevice>() { dev06, dev07, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
-            List<IBullseyeDevice> returnList = cache.CheckCacheForMultipleDevices(searchList);
+
+            var returnList = cache.CheckCacheForMultipleDevices(searchList);
             var size = returnList.Count;
 
             Assert.Equal(3, size);
         }
 
-        [Theory]
-        [InlineData(null)]
-        public void CheckCacheForMultipleDevices_NullList_ReturnsException(List<IBullseyeDevice> list)
-        {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            List<IBullseyeDevice> insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
-            cache.AddMultipleDevices(insertList, 3);
-            
-            Assert.Throws<ArgumentNullException>(() => cache.CheckCacheForMultipleDevices(list));
-        }
-
         [Fact]
         public void Count_EmptyCache_ReturnsZero()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var size = cache.Count;
 
             Assert.Equal(0, size);
@@ -154,7 +188,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void Count_SingleDeviceInCache_ReturnsOne()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev01, 3);
             var size = cache.Count;
 
@@ -164,12 +203,41 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void GetDevice_CheckDeviceInCacheMatchDeviceSentIn_DevicesMatch()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            List<IBullseyeDevice> insertList = new List<IBullseyeDevice>{ dev05, dev01, dev02, dev03, dev04 };
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
+            var insertList = new List<IBullseyeDevice>{ dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
-            BullseyeDevice myObj = (BullseyeDevice)cache.GetDevice(dev01);
+            var myObj = (BullseyeDevice)cache.GetDevice(dev01);
 
+            Assert.True(myObj.Equals(dev01));
+        }
+
+        [Fact]
+        public void GetDevice_CheckDeviceInCacheMatchesDeviceReturnedByKeySentIn_DevicesMatch()
+        {
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
+            var insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
+            cache.AddMultipleDevices(insertList, 3);
+
+            var myObj = (BullseyeDevice)cache.GetDevice("device 01");
+
+            var key1 = myObj.Id;
+            var key2 = dev01.Id;
+            var value1 = myObj.Payload;
+            var value2 = dev01.Payload;
+
+            Assert.Equal(key1, key2);
+            Assert.Equal(value1, value2);
             Assert.True(myObj.Equals(dev01));
         }
 
@@ -177,11 +245,14 @@ namespace BullseyeCacheTestProject
         [InlineData(null, null)]
         public void GetDevice_SendInNullDevice_ThrowsException(String DeviceString, BullseyeDevice Device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            cache.AddDevice(dev02, 5);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
 
-            Assert.Throws<ArgumentNullException>(() => cache.GetDevice(DeviceString));
-            Assert.Throws<ArgumentNullException>(() => cache.GetDevice(Device));
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
+            cache.AddDevice(dev02, 5);
+            
             Assert.Null(cache.GetDevice(dev05));
         }
 
@@ -199,7 +270,11 @@ namespace BullseyeCacheTestProject
                 keyword = "Now In";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
 
 
             Assert.False(flag);
@@ -215,9 +290,12 @@ namespace BullseyeCacheTestProject
         {
             var flag = false;
             var keyword = "Not In";
-            var addedDevice = "";
+
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
             
-            var cache = new BullseyeMemoryCache(_cache);
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, logger);
 
 
             Assert.False(flag);
@@ -231,7 +309,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void RemoveAllDevices_RemoveDevicesFromCache_CacheIsEmpty()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
@@ -255,7 +338,10 @@ namespace BullseyeCacheTestProject
                 keyword = "Now Removed";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, RemoveAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, RemoveAction, logger);
             
             Assert.True(flag);
             Assert.Equal("Not In", keyword);
@@ -271,40 +357,55 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void DefaultConstructor_DefaultCacheConstructor_NoRemoveDeviceCallbackExistsButDeviceGetsRemoved()
         {
-            var cache = new BullseyeMemoryCache(_cache);
-          
+
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, logger);
+
+
             cache.AddDevice(dev01, 3);
             Assert.Equal(1, cache.Count);
 
             cache.RemoveDevice(dev01);
             Assert.Equal(0, cache.Count);
-
         }
         
         [Theory]
         [InlineData(null)]
         public void DefaultConstructor_NullCache_ExceptionHandled(MemoryCache nullMemoryCache)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(nullMemoryCache));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(nullMemoryCache, logger));
         }
 
         [Fact]
         public void DefaultConstructor_DefaultCacheConstructor_NoUpdateDeviceCallbackExistsButDeviceGetsUpdated()
         {
-            var cache = new BullseyeMemoryCache(_cache);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, logger);
+
 
             cache.AddDevice(dev01, 3);
             Assert.Equal(1, cache.Count);
 
             cache.UpdateDevice(dev01, 10);
             Assert.Equal(1, cache.Count);
-
         }
 
         [Fact]
         public void RemoveDevice_RemoveSingleDevice_RemovesDevice()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
@@ -317,7 +418,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void RemoveDevice_RemoveSingleDeviceByKey_RemovesDevice()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
@@ -331,7 +437,12 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void RemoveDevice_RemoveNullDevice_ThrowsException(BullseyeDevice device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
@@ -341,7 +452,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void RemoveDevice_RemoveDeviceNotInCache_NoDeviceRemoved()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             List<IBullseyeDevice> insertList = new List<IBullseyeDevice> { dev05, dev01, dev02, dev03, dev04 };
             cache.AddMultipleDevices(insertList, 3);
 
@@ -350,12 +466,16 @@ namespace BullseyeCacheTestProject
 
             Assert.Equal(5, countAfterRemoval);
         }
-
-
+        
         [Fact]
-        public void UpdatedDevice_UpdateDeviceInCache_PayloadChanged()
+        public void UpdateDevice_UpdateDeviceInCache_PayloadChanged()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev01, 3);
             var editedPayload = dev01.Payload + "edit!";
             var dev01Copy = new BullseyeDevice(dev01.Id, editedPayload);
@@ -364,11 +484,16 @@ namespace BullseyeCacheTestProject
             
             Assert.NotEqual(dev01Copy.Payload, dev01.Payload);
         }
-
+        
         [Fact]
-        public void UpdatedDevice_UpdateDeviceInCache_DeviceInCacheIsUpdated()
+        public void UpdateDevice_UpdateDeviceInCache_DeviceInCacheIsUpdated()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev01, 3);
             var editedPayload = dev01.Payload + "edit!";
             var dev01Copy = new BullseyeDevice(dev01.Id, editedPayload);
@@ -382,49 +507,60 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void UpdateDevice_UpdateDeviceThatDoesNotExist_DeviceIsInserted()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.UpdateDevice(dev02, 3);
             var size = cache.Count;
             Assert.Equal(1, size);
         }
 
-        [Fact]
-        public void UpdateDevice_UpdateWithBadTime_ThrowsException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(-3)]
+        [InlineData(0)]
+        public void UpdateDevice_UpdateWithBadTime_ThrowsException(int seconds)
         {
-            BullseyeMemoryCache cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev02, 5);
 
             var size = cache.Count;
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.UpdateDevice(dev02, -3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => cache.UpdateDevice(dev02, seconds));
         }
 
         [Theory]
         [InlineData(null)]
         public void AddDevice_GetsNullIBullseyeDevice_ThrowsNullException(IBullseyeDevice device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             Assert.Throws<ArgumentNullException>(() => cache.AddDevice(device, 3));
         }
-
-        [Fact]
-        public void AddDevice_GetsZeroInt_ThrowsOutOfRangeException()
-        {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddDevice(dev03, 0));
-        }
-
-        [Fact]
-        public void AddDevice_GetsNegativeInt_ThrowsOutOfRangeException()
-        {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddDevice(dev03, -3));
-        }
-
+        
         [Theory]
         [InlineData(null)]
-        public void AddDevice_GetsNullInt_ThrowsNullException(int seconds)
+        [InlineData(-3)]
+        [InlineData(0)]
+        public void AddDevice_GetsBadIntSeconds_ThrowsException(int seconds)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddDevice(dev01, seconds));
         }
 
@@ -449,7 +585,11 @@ namespace BullseyeCacheTestProject
                 keyword = "New Device";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            
+            var logger = mock.Object;
+           
+            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, _helper.EvictionAction, logger);
 
             cache.AddDevice(dev07, 3);
             Assert.True(flag);
@@ -468,14 +608,24 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void AddMultipleDevices_GetsNullList_ThrowsNullException(List<IBullseyeDevice> list)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             Assert.Throws<ArgumentNullException>(() => cache.AddMultipleDevices(list, 3));
         }
 
         [Fact]
         public void AddMultipleDevices_GetsZeroInt_ThrowsOutOfRangeException()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var list = new List<IBullseyeDevice> { dev01, dev02, dev03 };
             Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, 0));
         }
@@ -483,7 +633,12 @@ namespace BullseyeCacheTestProject
         [Fact]
         public void AddMultipleDevices_GetsNegativeInt_ThrowsOutOfRangeException()
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var list = new List<IBullseyeDevice> { dev01, dev02, dev03 };
             Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, -3));
         }
@@ -492,7 +647,12 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void AddMultipleDevices_GetsNullInt_ThrowsNullException(int seconds)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             var list = new List<IBullseyeDevice>{ dev01, dev02, dev03 };
             Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, seconds));
         }
@@ -515,7 +675,11 @@ namespace BullseyeCacheTestProject
                 keyword = "New Device";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, _helper.EvictionAction, logger);
             var addList = new List<IBullseyeDevice>{dev01, dev02, dev03};
             var sameList = new List<IBullseyeDevice> { dev01, dev02, dev03 };
 
@@ -549,7 +713,10 @@ namespace BullseyeCacheTestProject
                 keyword = "New Device";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+           
+            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, _helper.EvictionAction, logger);
             var addList = new List<IBullseyeDevice> { dev01, dev02, dev03, dev04 };
             var sameList = new List<IBullseyeDevice> { dev01, dev02, dev05, dev06 };
 
@@ -572,66 +739,92 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void BullseyeMemoryCacheDefault_GetsNullIMemoryCache_ThrowsNullException(IMemoryCache cache)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(cache));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(cache, logger));
         }
 
         [Theory]
         [InlineData(null)]
         public void BullseyeMemoryCacheWithCallbacks_GetsNullIMemoryCache_ThrowsNullException(IMemoryCache cache)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger));
         }
 
         [Theory]
         [InlineData(null)]
         public void BullseyeMemoryCache_GetsNullPreCallbackAction_ThrowsNullException(Action<IBullseyeDevice> preCallbackAction)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, preCallbackAction, helper.UpdateAction, helper.EvictionAction));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, preCallbackAction, _helper.UpdateAction, _helper.EvictionAction, logger));
         }
 
         [Theory]
         [InlineData(null)]
         public void BullseyeMemoryCache_GetsNullUpdateCallbackAction_ThrowsNullException(Action<IBullseyeDevice> updateCallbackAction)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, helper.StartUpAction, updateCallbackAction, helper.EvictionAction));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, _helper.StartUpAction, updateCallbackAction, _helper.EvictionAction, logger));
         }
 
         [Theory]
         [InlineData(null)]
         public void BullseyeMemoryCache_GetsNullEvictionCallbackAction_ThrowsNullException(Action<IBullseyeDevice> removedCallbackAction)
         {
-            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, removedCallbackAction));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            Assert.Throws<ArgumentNullException>(() => new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, removedCallbackAction, logger));
         }
 
         [Theory]
         [InlineData(null)]
-        public void CheckCacheForMultipleDevices_GetsNullList_ThrowsNullException(List<IBullseyeDevice> list)
+        public void CheckCacheForMultipleDevices_GetsNullList_ReturnsNull(List<IBullseyeDevice> list)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentNullException>(() => cache.CheckCacheForMultipleDevices(list));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
+            Assert.Null(cache.CheckCacheForMultipleDevices(list));
         }
 
         [Theory]
         [InlineData(null)]
-        public void GetDevice_GetsNullIBullseyeDevice_ThrowsNullException(IBullseyeDevice device)
+        public void GetDevice_GetsNullIBullseyeDevice_ReturnsNull(IBullseyeDevice device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentNullException>(() => cache.GetDevice(device));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
+            Assert.Null(cache.GetDevice(device));
         }
 
         [Theory]
         [InlineData(null)]
-        public void GetDevice_GetsNullstring_ThrowsNullException(string key)
+        public void GetDevice_GetsNullString_ReturnsNull(string key)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            Assert.Throws<ArgumentNullException>(() => cache.GetDevice(key));
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
+            Assert.Null(cache.GetDevice(key));
         }
 
         [Theory]
         [InlineData(null)]
         public void RemoveDevice_GetsNullIBullseyeDevice_ThrowsNullException(IBullseyeDevice device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
             Assert.Throws<ArgumentNullException>(() => cache.RemoveDevice(device));
         }
 
@@ -639,7 +832,10 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void RemoveDevice_GetsNullString_ThrowsNullException(string key)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, _helper.EvictionAction, logger);
             Assert.Throws<ArgumentNullException>(() => cache.RemoveDevice(key));
         }
 
@@ -658,9 +854,11 @@ namespace BullseyeCacheTestProject
                 flag = true;
                 keyword = "Device Has Been Deleted";
             }
-            
 
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, RemoveAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction, RemoveAction, logger);
 
             cache.AddDevice(dev07, 3);
             cache.RemoveDevice(dev01); //this device is not in the cache
@@ -682,28 +880,32 @@ namespace BullseyeCacheTestProject
         [InlineData(null)]
         public void UpdateDevice_GetsNullIBullseyeDevice_ThrowsNullException(IBullseyeDevice device)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             Assert.Throws<ArgumentNullException>(() => cache.UpdateDevice(device, 3));
         }
 
-        [Fact]
-        public void UpdateDevice_GetsZeroInt_ThrowsOutOfRangeException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(-3)]
+        [InlineData(0)]
+        public void UpdateDevice_GetsBadIntSeconds_ThrowsException(int seconds)
         {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, _helper.UpdateAction,
+                _helper.EvictionAction, logger);
+
             cache.AddDevice(dev07, 3);
             Assert.Equal(1, cache.Count);
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.UpdateDevice(dev07, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => cache.UpdateDevice(dev07, seconds));
         }
-
-        [Fact]
-        public void UpdateDevice_GetsNegativeInt_ThrowsOutOfRangeException()
-        {
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, helper.UpdateAction, helper.EvictionAction);
-            cache.AddDevice(dev07, 3);
-            Assert.Equal(1, cache.Count);
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.UpdateDevice(dev07, -3));
-        }
-
+        
         [Fact]
         public void UpdateDevice_UpdateDeviceThatDoesNotExist_NewDeviceCallbackRunsInstead()
         {
@@ -725,7 +927,10 @@ namespace BullseyeCacheTestProject
                 keyword = "New Device";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, helper.EvictionAction);
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, StartUpAction, UpdateAction, _helper.EvictionAction, logger);
 
             cache.UpdateDevice(dev07, 3);
             Assert.True(flag);
@@ -733,10 +938,9 @@ namespace BullseyeCacheTestProject
             Assert.Equal("New Device", keyword);
             Assert.Equal(1, cache.Count);
         }
-
-
+        
         [Fact]
-        public void UpdatedDeviceCallback_StateUnderTest_ExpectedBehavior()
+        public void UpdatedDeviceCallback_UpdateActionDoesSomething_ActionIsPerformed()
         {
             var flag = false;
             var keyword = "Not Updated";
@@ -749,7 +953,12 @@ namespace BullseyeCacheTestProject
                 keyword = "Now Updated";
             }
 
-            var cache = new BullseyeMemoryCache(_cache, helper.StartUpAction, UpdateAction, helper.EvictionAction);
+            //todo
+            //work in progress
+            var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
+            var logger = mock.Object;
+            
+            var cache = new BullseyeMemoryCache(_cache, _helper.StartUpAction, UpdateAction, _helper.EvictionAction, logger);
 
             Assert.False(flag);
             Assert.Equal("Not Updated", keyword);
@@ -761,5 +970,9 @@ namespace BullseyeCacheTestProject
             Assert.Equal(dev01.Id, updatedDevice);
             Assert.Equal("Now Updated", keyword);
         }
+        
+        #endregion
     }
+
+
 }

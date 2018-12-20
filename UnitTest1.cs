@@ -394,8 +394,11 @@ namespace BullseyeCacheTestProject
             Assert.Throws<ArgumentNullException>(() => cache.AddMultipleDevices(list, 3));
         }
 
-        [Fact]
-        public void AddMultipleDevices_AddDevicesWithBadTime_ThrowsException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(-3)]
+        [InlineData(0)]
+        public void AddMultipleDevices_AddDevicesWithBadTime_ThrowsException(int seconds)
         {
             var mock = new Mock<ILogger<IBullseyeMemoryCache>>();
             var logger = mock.Object;
@@ -404,7 +407,7 @@ namespace BullseyeCacheTestProject
                 _helper.EvictionAction, logger);
             var list = new List<IBullseyeDevice>() { dev01, dev02, dev03 };
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, -3));
+            Assert.Throws<ArgumentOutOfRangeException>(() => cache.AddMultipleDevices(list, seconds));
         }
 
         [Fact]
